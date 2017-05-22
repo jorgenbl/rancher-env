@@ -1,0 +1,4 @@
+#!/usr/bin/env python
+
+import rancher_env
+print rancher_env.list_environments()
