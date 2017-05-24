@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import rancher_env
 import argparse
 

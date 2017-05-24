@@ -76,6 +76,8 @@ def list_all_environments():
         environments = get_environments()
         for environment in environments:
             row = [current_config['url']] + environment.split()
+            print(len(row))
+            print(row)
             table.append_row(row)
 
     # Backup current config, and remove it
@@ -91,7 +93,7 @@ def list_all_environments():
         copyfile(config["path"], current_config["path"])
         environments = get_environments()
         for environment in environments:
-            row = [config['url']] + environment.split()
+            row = [config['url']] + environment.split("\t")
             table.append_row(row)
         os.remove(current_config["path"])
 
@@ -127,7 +129,7 @@ def create_config(name):
                 os.rename(current_config["path"], confdir + "/" + name + ".cli.json")
             else:
                 timestamp = int(time.time())
-                os.rename(current_config["path"], confdir + "/" + timestamp + ".cli.json")
+                os.rename(current_config["path"], confdir + "/" + str(timestamp) + ".cli.json")
         else:
             print("No current config to save, please create one first with 'rancher config'")
     else:
@@ -151,8 +153,9 @@ def switch_config(config_path):
     if not current_saved:
         timestamp = int(time.time())
         confdir = get_confdir()
-        os.rename(current_config["path"], confdir + "/" + timestamp + ".cli.json")
-
+        if os.path.isfile(current_config["path"]): 
+            os.rename(current_config["path"], confdir + "/" + str(timestamp) + ".cli.json")
+        
     # Set new config    
     copyfile(config_path, current_config["path"])
 
@@ -195,14 +198,3 @@ def make_confdir():
     '''
     rancher_env_dir = get_confdir()
     os.makedirs(rancher_env_dir, mode=0o700, exist_ok=True)
-
-
-def main():
-    #list_environments()
-    #make_confdir()
-    #list_configs()
-    list_all_environments()
-    #switch_config("/Users/jblakstad/.rancher-env/lab-cli.json")
-
-if __name__ == "__main__":
-    main()

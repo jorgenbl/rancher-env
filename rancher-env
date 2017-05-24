@@ -2,6 +2,7 @@
 
 import rancher_env
 import argparse
+import sys
 
 def main(args):
 
@@ -12,18 +13,18 @@ def main(args):
     if args.list_all_conf:
         rancher_env.list_configs()
     if args.new_config:
-        rancher_env.create_config(new_config)
-    elif args.new_config == "":
-        rancher_env.create_config(new_config)
+        rancher_env.create_config(args.new_config)
+    elif args.new_config == None:
+        rancher_env.create_config("")
     if args.switch_config:
-        rancher_env.switch_config(switch_config)
-    elif args.switch_config == "":
+        rancher_env.switch_config(args.switch_config)
+    elif args.switch_config == None:
         print("Please enter the config to switch to")
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-nc', '--new_config', help='Save current config', default="")
+    parser.add_argument('-nc', '--new_config', help='Save current config', nargs='?', default="")
     parser.add_argument('-lc', '--list-all-conf',
                         help='List all configs',
                         action='store_true', default=False)
@@ -31,7 +32,10 @@ if __name__ == "__main__":
                         help='List all environments from all configs',
                         action='store_true', default=False)
     parser.add_argument('-sc', '--switch-config',
-                        help='Specify the config to switch to')
+                        help='Specify the config to switch to', nargs='?', default="")
+    if len(sys.argv)==1:
+        parser.print_help()
+        sys.exit(1)
     args = parser.parse_args()
 
     main(args)
