@@ -20,6 +20,8 @@ def main(args):
         rancher_env.create_config("")
     if args.switch_config:
         rancher_env.switch_config(args.switch_config)
+    if args.exec:
+        rancher_env.exec_on_container(args.exec)
     elif args.switch_config == None:
         print("Please enter the config to switch to")
 
@@ -38,6 +40,8 @@ if __name__ == "__main__":
                         action='store_true', default=False)
     parser.add_argument('-sc', '--switch-config',
                         help='Specify the config to switch to', nargs='?', default="")
+    parser.add_argument('-e', '--exec',
+                        help='Execute on container', nargs='?', default="")
     if len(sys.argv)==1:
         parser.print_help()
         sys.exit(1)

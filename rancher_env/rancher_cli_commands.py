@@ -5,6 +5,7 @@ import json
 import time
 from shutil import copyfile
 from beautifultable import BeautifulTable
+import pty
 
 def get_environments():
     '''
@@ -42,6 +43,13 @@ def get_containers_advanced(environment, url, accesskey, secretkey):
         result.append(line.decode("utf-8"))
     return result
 
+def exec_on_container(args):
+    shell = ["rancher", "exec"]
+    args = args.split()
+    shell = shell+args
+    print(shell)
+    pty.spawn(shell)
+
 def tablefy_environments(table, environments):
     for environment in environments:
         row = []
@@ -60,19 +68,10 @@ def tablefy_containers(table, containers):
         row.append(container["ID"])
         row.append(container["Service"]["type"])
         row.append(container["Name"])
-        image = "N/A"
-        #stack = container["Stack"]
-        #if "dockerCompose" in stack:
-        #    dockerCompose = stack["dockerCompose"].split("\n")
-        #    for line in dockerCompose:
-        #        if "image" in line:
-        #            image = line.split(":")[1].strip()
-        #            break
         try:
-            image = container["Service"]["launchConfig"]["imageUuid"]
+            row.append(container["Service"]["launchConfig"]["imageUuid"])
         except:
-            print("not found")
-        row.append(image)
+            row.append("N/A")
         row.append(container["Service"]["state"])
         try:
             nContainers = len(container["Service"]["instanceIds"])
@@ -202,9 +201,12 @@ def get_all_environments():
     for config in saved_configs:
         copyfile(config["path"], current_config["path"])
         for env in get_environments():
-            env = json.loads(env)
-            env["url"] = config["url"]
-            environments.append(env)
+            try:
+                env = json.loads(env)
+                env["url"] = config["url"]
+                environments.append(env)
+            except ValueError:
+                pass
         os.remove(current_config["path"])
 
     # Revert to old config if exists
