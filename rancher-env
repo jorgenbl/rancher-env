@@ -4,47 +4,47 @@ import rancher_env
 import argparse
 import sys
 
-def main(args):
+class RancherEnv(object):
 
-    rancher_env.make_confdir()
+    def __init__(self):
 
-    if args.list_all_env:
-        rancher_env.list_all_environments()
-    if args.list_all_containers:
-        rancher_env.list_all_containers()
-    if args.list_all_conf:
-        rancher_env.list_configs()
-    if args.new_config:
-        rancher_env.create_config(args.new_config)
-    elif args.new_config == None:
-        rancher_env.create_config("")
-    if args.switch_config:
-        rancher_env.switch_config(args.switch_config)
-    if args.exec:
-        rancher_env.exec_on_container(args.exec)
-    elif args.switch_config == None:
-        print("Please enter the config to switch to")
+        rancher_env.make_confdir()
 
-if __name__ == "__main__":
+        parser = argparse.ArgumentParser(description='Wrapper for rancher-cli. Support multiple environments', add_help=False)
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-nc', '--new_config', help='Save current config', nargs='?', default="")
-    parser.add_argument('-lconf', '--list-all-conf',
-                        help='List all configs',
-                        action='store_true', default=False)
-    parser.add_argument('-le', '--list-all-env',
-                        help='List all environments from all configs',
-                        action='store_true', default=False)
-    parser.add_argument('-lc', '--list-all-containers',
-                        help='List all environments from all configs',
-                        action='store_true', default=False)
-    parser.add_argument('-sc', '--switch-config',
-                        help='Specify the config to switch to', nargs='?', default="")
-    parser.add_argument('-e', '--exec',
-                        help='Execute on container', nargs='?', default="")
-    if len(sys.argv)==1:
-        parser.print_help()
-        sys.exit(1)
-    args = parser.parse_args()
+        options = parser.add_argument_group('Options')
+        options.add_argument('-h', '--help', action='help')
+        #options.add_argument('--reqarg', '-r', help='This is required', required=True)
+        #options.add_argument('--optarg','-o', help="This is optional", required=False)
 
-    main(args)
+        commands = parser.add_argument_group('Commands')
+        commands.add_argument('command', help='Subcommand to run')
+        # parse_args defaults to [1:] for args, but you need to
+        # exclude the rest of the args too, or validation will fail
+        args = parser.parse_args(sys.argv[1:2])
+        #args = parser.parse_args(sys.argv)
+        if not hasattr(self, args.command):
+            print('Unrecognized command')
+            parser.print_help()
+            exit(1)
+        # use dispatch pattern to invoke method with same name
+        getattr(self, args.command)()
+
+    def ps(self):
+        parser = argparse.ArgumentParser(
+            description='List all environments from all configs')
+        args = parser.parse_args(sys.argv[2:])
+        print('tst')
+
+    def config(self):
+        parser = argparse.ArgumentParser(
+            description='Save current config')
+        # NOT prefixing the argument with -- means it's not optional
+        parser.add_argument('--print', '-p', help="This will print the current saved configurations", required=False, action='store_true', default=False)
+        parser.add_argument('--switch_config', '-sc', help="This will switch to specified configuration", required=False, nargs='?', default="")
+        args = parser.parse_args(sys.argv[2:])
+        print('Running git fetch, repository=%s' % args.repository)
+
+
+if __name__ == '__main__':
+    RancherEnv()
